@@ -1,10 +1,12 @@
 import inspect
+import json
+from pathlib import Path
 from typing import Callable
 
 import torch
 import torch.nn as nn
 from accelerate import init_empty_weights
-from huggingface_hub import load_torch_model
+from safetensors.torch import load_file as load_safetensors_file
 
 from esm.models.esm3 import ESM3
 from esm.models.esmc import ESMC
@@ -23,6 +25,55 @@ from esm.utils.constants.models import (
 )
 
 ModelBuilder = Callable[[torch.device | str], nn.Module]
+
+
+def _normalize_esmc_checkpoint_key(key: str) -> str:
+    if key.startswith("esmc."):
+        key = key.removeprefix("esmc.")
+    if key.startswith("lm_head."):
+        key = "sequence_head." + key.removeprefix("lm_head.")
+    return key
+
+
+def _load_safetensors_into_empty_model(
+    model: nn.Module, checkpoint_dir: str | Path, device: torch.device | str
+) -> nn.Module:
+    checkpoint_dir = Path(checkpoint_dir)
+    index_path = checkpoint_dir / "model.safetensors.index.json"
+    if index_path.exists():
+        with index_path.open("r", encoding="utf-8") as handle:
+            index = json.load(handle)
+        shard_files = sorted(set(index["weight_map"].values()))
+    else:
+        shard_files = ["model.safetensors"]
+
+    model_keys = set(model.state_dict().keys())
+    loaded_keys: set[str] = set()
+    for shard_file in shard_files:
+        state_dict = load_safetensors_file(
+            str(checkpoint_dir / shard_file), device=str(torch.device(device))
+        )
+        state_dict = {
+            _normalize_esmc_checkpoint_key(key): value
+            for key, value in state_dict.items()
+        }
+        loaded_keys.update(state_dict.keys())
+        model.load_state_dict(state_dict, strict=False, assign=True)
+        del state_dict
+
+    missing_keys = sorted(model_keys - loaded_keys)
+    unexpected_keys = sorted(loaded_keys - model_keys)
+    if missing_keys or unexpected_keys:
+        details = []
+        if missing_keys:
+            details.append(f"missing keys: {missing_keys[:5]}")
+        if unexpected_keys:
+            details.append(f"unexpected keys: {unexpected_keys[:5]}")
+        raise RuntimeError(
+            f"Failed to load complete checkpoint from {checkpoint_dir}: "
+            + "; ".join(details)
+        )
+    return model.to(device)
 
 
 def ESM3_structure_encoder_v0(device: torch.device | str = "cpu"):
@@ -72,9 +123,7 @@ def ESMC_300M_202412(device: torch.device | str = "cpu", use_flash_attn: bool = 
             tokenizer=get_esmc_model_tokenizers(),
             use_flash_attn=use_flash_attn,
         ).eval()
-    load_torch_model(model, data_root("esmc-300"))
-    model = model.to(device)
-    return model
+    return _load_safetensors_into_empty_model(model, data_root("esmc-300"), device)
 
 
 def ESMC_600M_202412(device: torch.device | str = "cpu", use_flash_attn: bool = True):
@@ -86,9 +135,7 @@ def ESMC_600M_202412(device: torch.device | str = "cpu", use_flash_attn: bool = 
             tokenizer=get_esmc_model_tokenizers(),
             use_flash_attn=use_flash_attn,
         ).eval()
-    load_torch_model(model, data_root("esmc-600"))
-    model = model.to(device)
-    return model
+    return _load_safetensors_into_empty_model(model, data_root("esmc-600"), device)
 
 
 def ESMC_6B_202412(device: torch.device | str = "cpu", use_flash_attn: bool = True):
@@ -100,9 +147,7 @@ def ESMC_6B_202412(device: torch.device | str = "cpu", use_flash_attn: bool = Tr
             tokenizer=get_esmc_model_tokenizers(),
             use_flash_attn=use_flash_attn,
         ).eval()
-    load_torch_model(model, data_root("esmc-6b"))
-    model = model.to(device)
-    return model
+    return _load_safetensors_into_empty_model(model, data_root("esmc-6b"), device)
 
 
 def ESM3_sm_open_v0(device: torch.device | str = "cpu"):

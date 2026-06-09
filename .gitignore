@@ -3,3 +3,9 @@ esm.egg-info
 .pixi
 *.egg-info
 *.pyc
+
+# Generated experiment artifacts
+data/sample_nanobody10/cache_index.jsonl
+data/sample_nanobody10/esmc_cache/
+data/sample_nanobody10/mmcif/
+runs/

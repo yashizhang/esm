@@ -34,7 +34,7 @@ The code for ESM3 is available from Github and weights for esm3-sm-open-v1 is av
 First install the python library using `pip`:
 
 ```
-pip install esm@git+https://github.com/Biohub/esm.git@main
+pip install esm@git+https://github.com/yashizhang/esm.git@main
 ```
 
 Then import the necessary libraries and instantiate your model. Use your token from the [Biohub platform](https://biohub.ai")
@@ -54,7 +54,7 @@ The following code demonstrates how to run ESM3 locally and generate a simple se
 First install the python library using `pip`:
 
 ```
-pip install esm@git+https://github.com/Biohub/esm.git@main
+pip install esm@git+https://github.com/yashizhang/esm.git@main
 ```
 
 Then import the necessary libraries for your model.
@@ -89,7 +89,7 @@ protein.to_pdb("./round_tripped.pdb")
 ## Tutorials for ESM3
 <a name="tutorials-esm3"></a>
 
-For tutorials on how to use ESM3, see our Tutorials [here](https://github.com/Biohub/esm/tree/main/cookbook/tutorials).
+For tutorials on how to use ESM3, see our Tutorials [here](https://github.com/yashizhang/esm/tree/main/cookbook/tutorials).
 
 
 ## Responsible Development
@@ -102,7 +102,7 @@ Please follow our [Acceptable Use Policy](https://biohub.org/acceptable-use-poli
 ## Licenses
 <a name="licenses"></a>
 
-These models are available under the [MIT license](https://github.com/Biohub/esm/blob/main/LICENSE.md).
+These models are available under the [MIT license](https://github.com/yashizhang/esm/blob/main/LICENSE.md).
 
 ## Citations
 <a name="citations"></a>

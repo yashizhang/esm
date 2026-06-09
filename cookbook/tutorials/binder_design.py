@@ -2,7 +2,7 @@
 # requires-python = "<=3.13"
 # dependencies = [
 #     "abnumber",
-#     "esm@git+https://github.com/Biohub/esm.git@main",
+#     "esm@git+https://github.com/yashizhang/esm.git@main",
 #     "modal",
 # ]
 # ///
@@ -1152,7 +1152,7 @@ def get_base_image():
         .micromamba_install(
             "anarci>=2020.04.03", "hmmer=3.4", channels=["conda-forge", "bioconda"]
         )
-        .pip_install("abnumber", "esm@git+https://github.com/Biohub/esm.git@main")
+        .pip_install("abnumber", "esm@git+https://github.com/yashizhang/esm.git@main")
         .env({"HF_HOME": "/models", "HF_XET_HIGH_PERFORMANCE": "1"})
     )
 

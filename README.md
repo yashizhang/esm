@@ -4,7 +4,7 @@
 # A world model of protein biology: ESMC, ESMFold2, & ESM Atlas
 
 
-[ESMC & ESMFold2 Preprint](https://biohub.ai/papers/esm_protein.pdf) &sdot;  [Atlas](https://biohub.ai/esm/protein/atlas) &sdot; [Tutorials](https://github.com/Biohub/esm/tree/main/cookbook/tutorials) &sdot; [Slack](https://bit.ly/esm-slack)<br>
+[ESMC & ESMFold2 Preprint](https://biohub.ai/papers/esm_protein.pdf) &sdot;  [Atlas](https://biohub.ai/esm/protein/atlas) &sdot; [Tutorials](https://github.com/yashizhang/esm/tree/main/cookbook/tutorials) &sdot; [Slack](https://bit.ly/esm-slack)<br>
 </div>
 
 We are releasing a world model for protein biology: a scientific engine for prediction, design, and discovery. Built on the latest generation of Evolutionary Scale Modeling (ESM), this system learns from the protein sequences produced by evolution and uses that knowledge to represent, map, predict, and design proteins across scales — from atomic interactions to evolutionary relationships spanning billions of years. The system includes three artifacts: ESMC, ESMFold2, and ESM Atlas.
@@ -25,7 +25,7 @@ We are releasing a world model for protein biology: a scientific engine for pred
 </div>
 
 
-ESMFold2 is validated in the lab across five therapeutic targets. Inversion of ESMFold2 enables generation of de novo minibinders and antibody-derived scFvs with high hit rates, nanomolar affinities, target specificity, and functional activity. We've released the full protocol from target sequence to ranked binder design in this [notebook](https://github.com/Biohub/esm/blob/main/cookbook/tutorials/binder_design.ipynb). For additional details, please refer to the [preprint](https://biohub.ai/papers/esm_protein.pdf).
+ESMFold2 is validated in the lab across five therapeutic targets. Inversion of ESMFold2 enables generation of de novo minibinders and antibody-derived scFvs with high hit rates, nanomolar affinities, target specificity, and functional activity. We've released the full protocol from target sequence to ranked binder design in this [notebook](https://github.com/yashizhang/esm/blob/main/cookbook/tutorials/binder_design.ipynb). For additional details, please refer to the [preprint](https://biohub.ai/papers/esm_protein.pdf).
 
 <div align="center">
   <img src="_assets/esmfold2_binder.png" width="60%"/>
@@ -34,7 +34,7 @@ ESMFold2 is validated in the lab across five therapeutic targets. Inversion of E
 
 The **[ESM Atlas](https://biohub.ai/esm/protein/atlas)** is a map of 6.8 billion proteins covering the full breadth of life’s biodiversity. ESMFold2’s folding throughput enabled the prediction of more than one billion predicted structures. The Atlas is organized according to the internal world model of ESMC. We make this world model interpretable by training sparse autoencoders (SAEs). SAEs are unsupervised neural networks trained to decompose ESMC internal representations into a sparse set of ~16,000 interpretable features that reveal the functional relationships between proteins that ESMC has learned. Each feature is summarized in natural language with an agentic pipeline that maps features onto known biology from protein databases. We release a collection of SAEs trained on different model scales, layers, and at different levels of granularity. Learn more about how to use the ESM Atlas on the [Biohub Platform](https://biohub.ai/).
 
-For information on using ESM3, see the [ESM3 README](https://github.com/Biohub/esm/blob/main/_assets/ESM3_README.md).
+For information on using ESM3, see the [ESM3 README](https://github.com/yashizhang/esm/blob/main/_assets/ESM3_README.md).
 
 ## Table of Contents
 
@@ -60,7 +60,7 @@ There are two primary ways of running the ESM models: through the [**Biohub Plat
 Install `esm` from GitHub (a PyPI release is coming soon):
 
 ```
-pip install esm@git+https://github.com/Biohub/esm.git@main
+pip install esm@git+https://github.com/yashizhang/esm.git@main
 ```
 
 The following code demonstrates how to run ESMC locally
@@ -103,7 +103,7 @@ Note that our API migrated from forge.evolutionaryscale.ai to [biohub.ai](https:
 To get started with ESM, install the python library using `pip`:
 
 ```
-pip install esm@git+https://github.com/Biohub/esm.git@main
+pip install esm@git+https://github.com/yashizhang/esm.git@main
 ```
 
 Then import the necessary libraries and instantiate your desired model.
@@ -133,7 +133,7 @@ logits_output = model.logits(
 print(logits_output.logits, logits_output.embeddings)
 ```
 
-For tutorials on how to use ESMC, see our [tutorials](https://github.com/Biohub/esm/tree/main/cookbook/tutorials).
+For tutorials on how to use ESMC, see our [tutorials](https://github.com/yashizhang/esm/tree/main/cookbook/tutorials).
 
 ## ESMC Sparse Autoencoders (SAE)
 <a name="esmc-sparse-autoencoders"></a>
@@ -171,7 +171,7 @@ print(output["sae_outputs"]["layer60"].shape)
 
 ```
 
-For tutorials on how to use ESMC SAEs, see our [tutorials](https://github.com/Biohub/esm/tree/main/cookbook/tutorials).
+For tutorials on how to use ESMC SAEs, see our [tutorials](https://github.com/yashizhang/esm/tree/main/cookbook/tutorials).
 
 ## ESMFold2
 <a name="esmfold2"></a>
@@ -239,7 +239,7 @@ with open("1mht_pred.cif", "w") as f:
 Install the `esm` Python package
 
 ```
-pip install esm@git+https://github.com/Biohub/esm.git@main
+pip install esm@git+https://github.com/yashizhang/esm.git@main
 ```
 
 Import the necessary libraries.
@@ -276,7 +276,7 @@ with open("result.cif", "w") as f:
     f.write(result.complex.to_mmcif())
 ```
 
-For tutorials on how to use ESMFold2, see our [tutorials](https://github.com/Biohub/esm/tree/main/cookbook/tutorials).
+For tutorials on how to use ESMFold2, see our [tutorials](https://github.com/yashizhang/esm/tree/main/cookbook/tutorials).
 
 
 ## Frontier Safety
@@ -295,7 +295,7 @@ Please follow our [Acceptable Use Policy](https://biohub.org/acceptable-use-poli
 ## Licenses
 <a name="licenses"></a>
 
-These models are available under the [MIT license](https://github.com/Biohub/esm/blob/main/LICENSE.md).
+These models are available under the [MIT license](https://github.com/yashizhang/esm/blob/main/LICENSE.md).
 
 ## Citations
 <a name="citations"></a>

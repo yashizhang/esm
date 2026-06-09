@@ -1,0 +1,11 @@
+example_id,pdb_id,mmcif_url,label_asym_id,auth_asym_id,chain_match_policy,expected_entity_name_regex,task,split
+nanobody_001,1MEL,https://files.rcsb.org/download/1MEL.cif,A,A,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_002,1MEL,https://files.rcsb.org/download/1MEL.cif,B,B,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_003,1I3V,https://files.rcsb.org/download/1I3V.cif,A,A,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_004,1I3V,https://files.rcsb.org/download/1I3V.cif,B,B,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_005,6JB9,https://files.rcsb.org/download/6JB9.cif,A,A,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_006,5U64,https://files.rcsb.org/download/5U64.cif,A,B,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_007,4KRN,https://files.rcsb.org/download/4KRN.cif,A,A,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_008,4KRL,https://files.rcsb.org/download/4KRL.cif,A,B,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_009,4KRO,https://files.rcsb.org/download/4KRO.cif,B,B,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
+nanobody_010,4KRP,https://files.rcsb.org/download/4KRP.cif,B,B,label_asym_id_first_then_auth_asym_id,"(?i)(nanobody|vhh|single-domain|vh single-domain|antibody vhh)",monomer_vhh_train,train
