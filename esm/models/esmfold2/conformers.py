@@ -6,6 +6,7 @@ Conformer priority follows AF3 Section 2.8: Computed > Ideal > first available.
 
 from __future__ import annotations
 
+import logging
 import os
 import pickle
 from pathlib import Path
@@ -14,6 +15,8 @@ import numpy as np
 from huggingface_hub import hf_hub_download
 
 from esm.models.esmfold2.constants import RES_TYPE_TO_CCD
+
+logger = logging.getLogger(__name__)
 
 if os.environ.get("ESMCFOLD_CCD_PATH"):
     CCD_PICKLE_PATH = Path(os.environ["ESMCFOLD_CCD_PATH"])
@@ -66,7 +69,7 @@ def load_ccd(cache_dir: Path | str | None = None) -> dict:
             f"CCD pickle file not found: {pkl_path}. Please set the ESMCFOLD_CCD_PATH environment variable to the path of a valid CCD pickle file or download the file from the Hugging Face repository."
         )
 
-    print(f"Loading CCD dictionary from {pkl_path}")
+    logger.debug("Loading CCD dictionary from %s", pkl_path)
     with open(pkl_path, "rb") as f:
         _CCD_MOLECULES = pickle.load(f)
 

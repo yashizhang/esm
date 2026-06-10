@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import sys
 import warnings
 from pathlib import Path
@@ -45,3 +46,16 @@ def synthetic_batch():
 @pytest.fixture()
 def tiny_model():
     return tiny_esmfold2_model()
+
+
+@pytest.fixture()
+def finetune_script():
+    path = ROOT / "scripts" / "esmfold2_frozen_feature_finetune.py"
+    spec = importlib.util.spec_from_file_location(
+        "esmfold2_frozen_feature_finetune", path
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

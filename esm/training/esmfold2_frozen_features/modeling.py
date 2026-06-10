@@ -291,30 +291,35 @@ def _confidence_coordinates(
 ) -> Tensor:
     if sampling_steps <= 0:
         return fallback.detach()
-    with torch.no_grad(), _seed_context(seed):
-        sampled = model.structure_head.sample(
-            z_trunk=z.detach().float(),
-            s_inputs=x_inputs.detach(),
-            s_trunk=None,
-            relative_position_encoding=relative_position_encoding.detach(),
-            ref_pos=batch["ref_pos"],
-            ref_charge=batch["ref_charge"],
-            ref_mask=batch["atom_attention_mask"].bool(),
-            ref_element=ref_element_oh,
-            ref_atom_name_chars=ref_atom_name_chars_oh,
-            ref_space_uid=batch["ref_space_uid"],
-            tok_idx=atom_to_token,
-            asym_id=batch["asym_id"],
-            residue_index=batch["residue_index"],
-            entity_id=batch["entity_id"],
-            token_index=batch["token_index"],
-            sym_id=batch["sym_id"],
-            token_attention_mask=batch["token_attention_mask"].bool(),
-            num_diffusion_samples=1,
-            num_sampling_steps=sampling_steps,
-            return_atom_repr=False,
-            denoising_early_exit_rmsd=None,
-        )
+    try:
+        with torch.no_grad(), _seed_context(seed):
+            sampled = model.structure_head.sample(
+                z_trunk=z.detach().float(),
+                s_inputs=x_inputs.detach(),
+                s_trunk=None,
+                relative_position_encoding=relative_position_encoding.detach(),
+                ref_pos=batch["ref_pos"],
+                ref_charge=batch["ref_charge"],
+                ref_mask=batch["atom_attention_mask"].bool(),
+                ref_element=ref_element_oh,
+                ref_atom_name_chars=ref_atom_name_chars_oh,
+                ref_space_uid=batch["ref_space_uid"],
+                tok_idx=atom_to_token,
+                asym_id=batch["asym_id"],
+                residue_index=batch["residue_index"],
+                entity_id=batch["entity_id"],
+                token_index=batch["token_index"],
+                sym_id=batch["sym_id"],
+                token_attention_mask=batch["token_attention_mask"].bool(),
+                num_diffusion_samples=1,
+                num_sampling_steps=sampling_steps,
+                return_atom_repr=False,
+                denoising_early_exit_rmsd=None,
+            )
+    except RuntimeError as exc:
+        if "linalg.svd" not in str(exc) or "failed to converge" not in str(exc):
+            raise
+        return fallback.detach()
     x_pred = sampled["sample_atom_coords"]
     assert x_pred is not None
     return x_pred.detach()
@@ -337,6 +342,20 @@ def _disable_checkpoint_for_folding_trunk(trunk: nn.Module):
         yield
     finally:
         trunk.forward = saved_forward  # type: ignore[method-assign]
+
+
+def _cuda_autocast_context(
+    model: nn.Module, device: torch.device, *, allow_fp16: bool = True
+):
+    dtype = getattr(model, "_esmfold2_autocast_dtype", torch.bfloat16)
+    if device.type != "cuda" or dtype is None:
+        return nullcontext()
+    # The full ESMFold2 training forward produces NaNs under fp16 autocast on V100.
+    # Keep fp16 runs on GradScaler-backed fp32 module math; bf16 autocast remains
+    # available for GPUs that support it.
+    if dtype is torch.float16:
+        return nullcontext()
+    return torch.amp.autocast("cuda", enabled=True, dtype=dtype)
 
 
 def _safe_confidence_head_forward(
@@ -471,8 +490,7 @@ def forward_train_from_precomputed_lm(
     grad_loops = config.recurrent_grad_loops
 
     res_type_oh, ref_element_oh, ref_atom_name_chars_oh, atom_to_token, tok_mask = _one_hot_inputs(features)
-    use_amp = features["ref_pos"].device.type == "cuda"
-    autocast_ctx = torch.amp.autocast("cuda", enabled=use_amp, dtype=torch.bfloat16)
+    autocast_ctx = _cuda_autocast_context(self, features["ref_pos"].device)
     with autocast_ctx:
         x_inputs, z_init, relative_position_encoding, token_bonds_encoding = _input_embeddings(
             self, features, res_type_oh, ref_element_oh, ref_atom_name_chars_oh, atom_to_token
@@ -557,8 +575,8 @@ def forward_train_from_precomputed_lm(
             if trunk is not None
             else nullcontext()
         )
-        confidence_autocast_ctx = torch.amp.autocast(
-            "cuda", enabled=confidence_z.device.type == "cuda", dtype=torch.bfloat16
+        confidence_autocast_ctx = _cuda_autocast_context(
+            self, confidence_z.device, allow_fp16=False
         )
         with checkpoint_context, confidence_autocast_ctx:
             confidence_output = _safe_confidence_head_forward(
@@ -734,7 +752,9 @@ def tiny_esmfold2_model() -> nn.Module:
     return ensure_forward_train_from_precomputed_lm(model)
 
 
-def load_esmfold2_for_training(model_checkpoint: str, device: torch.device, precision: str) -> nn.Module:
+def load_esmfold2_for_training(
+    model_checkpoint: str, device: torch.device, precision: str
+) -> nn.Module:
     if model_checkpoint in {"tiny-random", "random-tiny"}:
         model = tiny_esmfold2_model()
     else:
@@ -742,13 +762,19 @@ def load_esmfold2_for_training(model_checkpoint: str, device: torch.device, prec
             raise ImportError("Biohub transformers ESMFold2Model is required")
         model = ESMFold2Model.from_pretrained(model_checkpoint, load_esmc=False)
         model = ensure_forward_train_from_precomputed_lm(model)
+    precision = {"bfloat16": "bf16", "float32": "fp32"}.get(precision, precision)
     model = model.to(device)
-    if device.type == "cuda" and precision in {"bf16", "bfloat16"}:
+    if device.type == "cuda" and precision == "bf16":
         model = model.to(torch.bfloat16)
+        model._esmfold2_autocast_dtype = torch.bfloat16
         if hasattr(model, "structure_head"):
             model.structure_head.float()
+    elif device.type == "cuda" and precision == "fp16":
+        model = model.float()
+        model._esmfold2_autocast_dtype = torch.float16
     else:
         model = model.float()
+        model._esmfold2_autocast_dtype = None
     if getattr(model, "_esmc", None) is not None:
         raise RuntimeError("loaded ESMFold2 model contains ESMC despite load_esmc=False")
     return model

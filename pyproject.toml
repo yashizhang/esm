@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "torch>=2.2.0",
+  "torch>=2.2.0,<2.8",
   "transformers @ git+https://github.com/Biohub/transformers.git@main",
   "ipython",
   "einops",
@@ -44,6 +44,7 @@ dependencies = [
   "pygtrie",
   "dna_features_viewer",
   "accelerate",
+  "tqdm",
 ]
 # Pytest
 [tool.pytest.ini_options]
