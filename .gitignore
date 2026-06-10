@@ -5,7 +5,11 @@ esm.egg-info
 *.pyc
 
 # Generated experiment artifacts
+data/sabdab_nano_temporal/
+data/tfold_sabdab22h2/
 data/sample_nanobody10/cache_index.jsonl
 data/sample_nanobody10/esmc_cache/
 data/sample_nanobody10/mmcif/
+logs/
 runs/
+wandb/
